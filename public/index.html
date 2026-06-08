@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ff8c00">
+<link rel="manifest" href="/manifest.json">
+<title>ASSEMBLE — לשכת חה"כ קרויזר</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#000; min-height:100vh; color:#fff; font-family:'Heebo',sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; gap:14px; }
+
+.card { position:relative; width:min(620px,100%); border-radius:18px; overflow:hidden; box-shadow:0 0 40px rgba(255,140,0,0.25), 0 20px 60px rgba(0,0,0,0.9); }
+.card img.card-bg { width:100%; display:block; }
+
+.photo-box {
+  position:absolute;
+  top:8%; right:4.5%;
+  width:26%; aspect-ratio:1/1;
+  border-radius:6px; overflow:hidden; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,0.06);
+}
+.photo-box img { width:100%; height:100%; object-fit:cover; }
+.photo-box .hint { color:rgba(255,255,255,0.5); text-align:center; font-size:clamp(0.45rem,1.5vw,0.65rem); display:flex; flex-direction:column; align-items:center; gap:3px; padding:4px; }
+.photo-box .hint span { font-size:clamp(1rem,3vw,1.5rem); }
+
+.name-tag {
+  position:absolute;
+  top:62%; right:4.5%;
+  width:26%; text-align:center;
+  font-size:clamp(0.45rem,1.6vw,0.75rem); font-weight:700;
+  color:rgba(255,220,140,0.95);
+  text-shadow:0 0 8px rgba(255,140,0,0.6);
+  pointer-events:none;
+}
+
+.knesset-btn {
+  position:absolute; bottom:5%; right:3%;
+  width:20%; aspect-ratio:1; border-radius:50%;
+  background:transparent; border:none; cursor:pointer; z-index:10;
+}
+.knesset-btn:active { transform:scale(0.92); }
+.knesset-btn.firing { animation:kp 0.3s ease-in-out infinite alternate; }
+@keyframes kp {
+  from { box-shadow:0 0 20px rgba(255,140,0,0.5); }
+  to   { box-shadow:0 0 60px rgba(255,140,0,1), 0 0 100px rgba(255,140,0,0.6); transform:scale(1.08); }
+}
+.ring { position:absolute; bottom:5%; right:3%; width:20%; aspect-ratio:1; border-radius:50%; border:2.5px solid rgba(255,140,0,0.7); opacity:0; pointer-events:none; z-index:9; }
+.card.firing .ring { animation:ro 1s ease-out forwards; }
+.card.firing .ring:nth-child(1){animation-delay:0s}
+.card.firing .ring:nth-child(2){animation-delay:0.22s}
+.card.firing .ring:nth-child(3){animation-delay:0.44s}
+@keyframes ro { 0%{transform:scale(1);opacity:0.9} 100%{transform:scale(5);opacity:0} }
+.flash { position:absolute; inset:0; background:rgba(255,140,0,0.1); opacity:0; pointer-events:none; }
+.card.firing .flash { animation:fl 0.4s ease-in-out 3; }
+@keyframes fl { 0%,100%{opacity:0} 50%{opacity:1} }
+
+/* ONBOARD */
+#onboard { position:fixed; inset:0; background:rgba(0,0,0,0.93); backdrop-filter:blur(8px); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; }
+.ob { background:#0d1018; border:1px solid rgba(255,140,0,0.4); border-radius:20px; padding:28px 24px; width:min(370px,94vw); text-align:center; max-height:92vh; overflow-y:auto; }
+.ob-title { font-size:1.7rem; font-weight:900; letter-spacing:4px; background:linear-gradient(135deg,#ff8c00,#ffb347); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.ob-sub { font-size:0.76rem; color:#556; margin-bottom:20px; }
+.ob-label { font-size:0.72rem; font-weight:700; color:#778; text-align:right; margin-bottom:7px; }
+.ob-preview { display:none; margin-bottom:10px; }
+.ob-preview img { width:100%; border-radius:10px; display:block; }
+.face-preview { display:none; text-align:center; margin-bottom:10px; }
+.face-preview img { width:90px; height:90px; border-radius:12px; object-fit:cover; }
+.file-input { width:100%; padding:12px; background:#070a0f; border:2px dashed rgba(255,140,0,0.5); border-radius:10px; color:#ff8c00; font-family:'Heebo'; font-size:0.85rem; cursor:pointer; margin-bottom:14px; display:block; }
+.ob-input { width:100%; background:#070a0f; border:1px solid #1e2a3a; border-radius:10px; padding:12px 14px; color:#fff; font-family:'Heebo'; font-size:0.95rem; outline:none; direction:rtl; margin-bottom:16px; }
+.ob-input:focus { border-color:#ff8c00; }
+.ob-btn { width:100%; padding:13px; background:linear-gradient(135deg,#ff8c00,#cc6600); border:none; border-radius:12px; color:#fff; font-family:'Heebo'; font-weight:900; font-size:1rem; letter-spacing:2px; cursor:pointer; box-shadow:0 4px 20px rgba(255,140,0,0.45); }
+.divider { height:1px; background:#1a2030; margin:6px 0 18px; }
+
+/* LOCATION */
+#loc-modal { position:fixed; inset:0; background:rgba(0,0,0,0.88); backdrop-filter:blur(6px); z-index:200; display:none; align-items:center; justify-content:center; padding:16px; }
+#loc-modal.show { display:flex; }
+.loc-box { background:#0d1018; border:1px solid rgba(255,140,0,0.5); border-radius:18px; padding:26px 22px; width:min(340px,94vw); text-align:center; }
+.loc-title { font-size:1.4rem; font-weight:900; letter-spacing:4px; color:#ff8c00; margin-bottom:4px; }
+.loc-sub { font-size:0.78rem; color:#556; margin-bottom:18px; }
+.loc-row { display:flex; gap:8px; }
+.loc-row input { flex:1; background:#070a0f; border:1px solid #1e2a3a; border-radius:10px; padding:12px 13px; color:#fff; font-family:'Heebo'; font-size:0.95rem; outline:none; direction:rtl; }
+.loc-row input:focus { border-color:#ff8c00; }
+.loc-go { padding:12px 16px; background:linear-gradient(135deg,#ff8c00,#cc6600); border:none; border-radius:10px; color:#fff; font-family:'Heebo'; font-weight:900; cursor:pointer; }
+.loc-cancel { margin-top:12px; background:none; border:none; color:#445; font-family:'Heebo'; font-size:0.85rem; cursor:pointer; width:100%; }
+
+/* BOTTOM */
+.bottom { width:min(620px,100%); display:flex; flex-direction:column; gap:10px; }
+.status { background:rgba(10,14,20,0.95); border:1px solid #1a2535; border-radius:12px; padding:10px 16px; display:flex; align-items:center; gap:10px; font-size:0.8rem; color:#445; }
+.sdot { width:8px; height:8px; border-radius:50%; background:#2dce6e; box-shadow:0 0 8px #2dce6e; animation:bl 2s infinite; flex-shrink:0; }
+@keyframes bl { 0%,100%{opacity:1} 50%{opacity:0.25} }
+.feed { display:flex; flex-direction:column; gap:7px; max-height:150px; overflow-y:auto; }
+.fi { background:rgba(255,140,0,0.07); border:1px solid rgba(255,140,0,0.2); border-radius:10px; padding:9px 14px; display:flex; align-items:center; gap:9px; font-size:0.82rem; animation:fii 0.3s ease; }
+@keyframes fii { from{transform:translateX(16px);opacity:0} to{transform:translateX(0);opacity:1} }
+.fi-who { color:#ff8c00; font-weight:700; }
+.fi-loc { color:#ffe0a0; font-weight:900; }
+.fi-time { color:#445; font-size:0.7rem; margin-right:auto; }
+</style>
+</head>
+<body>
+
+<!-- ONBOARD -->
+<div id="onboard">
+  <div class="ob">
+    <div class="ob-title">ASSEMBLE</div>
+    <div class="ob-sub">לשכת חה"כ קרויזר</div>
+
+    <div id="card-section">
+      <div class="ob-label">1 · העלה את תמונת הכרטיס</div>
+      <div class="ob-preview" id="card-prev"><img id="card-prev-img"></div>
+      <input type="file" id="card-file" accept="image/*" class="file-input">
+      <div class="divider"></div>
+    </div>
+
+    <div class="ob-label">2 · תמונת הפנים שלך</div>
+    <div class="face-preview" id="face-prev"><img id="face-prev-img"></div>
+    <input type="file" id="face-file" accept="image/*" class="file-input">
+
+    <div class="ob-label" style="margin-top:4px">3 · שם מלא</div>
+    <input class="ob-input" id="ob-name" type="text" placeholder="שם מלא">
+    <button class="ob-btn" id="ob-btn">כניסה למערכת ←</button>
+  </div>
+</div>
+
+<!-- LOCATION MODAL -->
+<div id="loc-modal">
+  <div class="loc-box">
+    <div class="loc-title">⚡ ASSEMBLE</div>
+    <div class="loc-sub">היכן מתכנסים?</div>
+    <div class="loc-row">
+      <input id="loc-in" type="text" placeholder="מיקום הפגישה...">
+      <button class="loc-go" id="loc-go">שלח</button>
+    </div>
+    <button class="loc-cancel" id="loc-cancel">ביטול</button>
+  </div>
+</div>
+
+<!-- CARD -->
+<div id="card-wrap"></div>
+
+<!-- BOTTOM -->
+<div class="bottom">
+  <div class="status">
+    <div class="sdot"></div>
+    <span>מנויים: <b id="s-cnt" style="color:#ff8c00">—</b></span>
+  </div>
+  <div class="feed" id="feed"></div>
+</div>
+
+<audio id="snd" src="https://www.myinstants.com/media/sounds/avengers_assemble_cap.mp3" preload="auto"></audio>
+
+<script>
+const $=id=>document.getElementById(id);
+const ls={
+  get:k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const toData=f=>new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(f)});
+
+let me=null, cardImg=null, pendingFace=null, isFiring=false;
+
+// ── file inputs ──
+$('card-file').onchange=async e=>{
+  const f=e.target.files[0]; if(!f)return;
+  cardImg=await toData(f);
+  ls.set('card',cardImg);
+  $('card-prev').style.display='block';
+  $('card-prev-img').src=cardImg;
+};
+
+$('face-file').onchange=async e=>{
+  const f=e.target.files[0]; if(!f)return;
+  pendingFace=await toData(f);
+  $('face-prev').style.display='block';
+  $('face-prev-img').src=pendingFace;
+};
+
+// ── submit ──
+$('ob-btn').onclick=async()=>{
+  const name=$('ob-name').value.trim();
+  if(!cardImg){alert('אנא העלה את תמונת הכרטיס');return;}
+  if(!name){$('ob-name').focus();return;}
+  me={name,avatar:pendingFace,id:Math.random().toString(36).slice(2,9)};
+  ls.set('user',me);
+  $('onboard').style.display='none';
+  buildCard();
+  await registerPush();
+  refreshCount();
+};
+
+// ── card ──
+function buildCard(){
+  $('card-wrap').innerHTML=`
+    <div class="card" id="card">
+      <img class="card-bg" src="${cardImg}">
+      <div class="photo-box" id="pbox">
+        ${me.avatar?`<img src="${me.avatar}">`:`<div class="hint"><span>📷</span><div>תמונה</div></div>`}
+      </div>
+      <input type="file" id="fc" accept="image/*" style="display:none">
+      <div class="name-tag" id="ntag">${me.name}</div>
+      <button class="knesset-btn" id="kbtn"></button>
+      <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+      <div class="flash"></div>
+    </div>`;
+  $('kbtn').onclick=openLoc;
+  $('pbox').onclick=()=>$('fc').click();
+  $('fc').onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    me.avatar=await toData(f);ls.set('user',me);
+    $('pbox').innerHTML=`<img src="${me.avatar}">`;
+  };
+}
+
+// ── location ──
+function openLoc(){$('loc-in').value='';$('loc-modal').classList.add('show');setTimeout(()=>$('loc-in').focus(),80);}
+function closeLoc(){$('loc-modal').classList.remove('show');}
+$('loc-cancel').onclick=closeLoc;
+$('loc-in').onkeydown=e=>{if(e.key==='Enter')sendAssemble();};
+$('loc-go').onclick=sendAssemble;
+
+async function sendAssemble(){
+  const loc=$('loc-in').value.trim();if(!loc){$('loc-in').focus();return;}
+  closeLoc();
+  playSound();
+  doFire({sender:me.name,loc,time:now()});
+  try{
+    await fetch('/assemble',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sender:me.name,loc})});
+  }catch(e){console.warn('server error',e);}
+}
+
+// ── audio ──
+function playSound(){const a=$('snd');a.currentTime=0;a.volume=1;a.play().catch(()=>{});}
+
+// ── fire animation ──
+function doFire(data){
+  if(isFiring)return;isFiring=true;
+  const card=$('card'),btn=$('kbtn');
+  card&&card.classList.add('firing');
+  btn&&btn.classList.add('firing');
+  addFeed(data);
+  setTimeout(()=>{card&&card.classList.remove('firing');btn&&btn.classList.remove('firing');isFiring=false;},2500);
+}
+
+function addFeed(data){
+  const el=document.createElement('div');el.className='fi';
+  el.innerHTML=`<span>🚨</span><span class="fi-who">${data.sender}</span><span style="color:#333">→</span><span class="fi-loc">${data.loc}</span><span class="fi-time">${data.time}</span>`;
+  $('feed').prepend(el);
+  while($('feed').children.length>6)$('feed').lastChild.remove();
+}
+
+function now(){return new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+
+// ── PUSH ──
+function b64(s){const p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),r=atob(b),a=new Uint8Array(r.length);for(let i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a;}
+
+async function registerPush(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
+  try{
+    const reg=await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.ready;
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted')return;
+    const key=await(await fetch('/vapidPublicKey')).text();
+    if(key==='PASTE_HERE')return;
+    const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(key)});
+    await fetch('/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub,name:me.name})});
+  }catch(e){console.error('push error',e);}
+}
+
+// service worker → play sound when push arrives & app is open
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',ev=>{
+    if(ev.data?.type==='PLAY_SOUND'){
+      playSound();
+      doFire({sender:ev.data.data?.sender,loc:ev.data.data?.loc,time:now()});
+    }
+  });
+}
+
+async function refreshCount(){
+  try{const r=await(await fetch('/count')).json();$('s-cnt').textContent=r.count;}catch(e){}
+}
+
+// ── init ──
+(function(){
+  cardImg=ls.get('card');
+  me=ls.get('user');
+  if(cardImg)$('card-section').style.display='none';
+  if(cardImg&&me){
+    $('onboard').style.display='none';
+    buildCard();
+    registerPush();
+    refreshCount();
+    setInterval(refreshCount,15000);
+  }
+})();
+</script>
+</body>
+</html>
